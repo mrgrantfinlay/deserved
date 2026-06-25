@@ -21,6 +21,7 @@ jobs:
         with:
           repository: mrgrantfinlay/knowledge
           path: knowledge
+          token: ${{ secrets.KNOWLEDGE_REPO_TOKEN }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
