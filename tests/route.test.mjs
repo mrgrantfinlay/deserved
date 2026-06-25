@@ -12,23 +12,25 @@ describe("routeQuery", () => {
     expect(r.matches.length).toBe(1);
     expect(r.matches[0].provider_id).toBe("deserved-massage");
     expect(r.matches[0].offer_id).toBe("deserved-massage-back-pain-glasgow");
+    expect(r.intake.problem_slug).toBe("back-pain");
   });
 
-  it("routes STI concern to north park pharmacy", () => {
+  it("classifies STI but returns no match until pharmacy cell is routing-eligible", () => {
     const r = routeQuery({
       need_description: "Need STI screening confidentially in Glasgow",
       location: "Glasgow",
     });
-    expect(r.matches[0].provider_id).toBe("north-park-pharmacy");
-    expect(r.matches[0].validation_status).toBe("draft");
+    expect(r.intake.problem_slug).toBe("sti-screening");
+    expect(r.matches.length).toBe(0);
   });
 
-  it("routes tooth pain to west dental", () => {
+  it("classifies dental emergency but returns no match until west-dental is routing-eligible", () => {
     const r = routeQuery({
       need_description: "Broken tooth, severe dental pain Glasgow emergency",
       location: "Glasgow",
     });
-    expect(r.matches[0].provider_id).toBe("west-dental");
+    expect(r.intake.problem_slug).toBe("dental-emergency");
+    expect(r.matches.length).toBe(0);
   });
 
   it("routes burnout to deserved massage emotional offer", () => {
@@ -39,12 +41,12 @@ describe("routeQuery", () => {
     expect(r.matches[0].offer_id).toBe("deserved-massage-stress-burnout-glasgow");
   });
 
-  it("routes smile confidence to west dental identity offer", () => {
+  it("classifies smile confidence but returns no match until west-dental is routing-eligible", () => {
     const r = routeQuery({
       need_description: "Self-conscious about my smile in meetings, Glasgow",
       location: "Glasgow",
     });
-    expect(r.matches[0].provider_id).toBe("west-dental");
-    expect(r.matches[0].problem_type).toBe("Identity");
+    expect(r.intake.problem_slug).toBe("smile-confidence");
+    expect(r.matches.length).toBe(0);
   });
 });

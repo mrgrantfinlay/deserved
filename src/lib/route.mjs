@@ -6,6 +6,7 @@ import {
   urgencyMatch,
 } from "./asp.mjs";
 import { classifyIntake } from "./classify.mjs";
+import { classifyFromDoctrine, disambiguateOffers } from "./routing.mjs";
 import { newId } from "./util.mjs";
 
 function relevanceBoost(description, offer) {
@@ -49,11 +50,29 @@ export function routeQuery(input) {
 
   const { intake } = classified;
   const description = intake.need_description ?? input.need_description ?? "";
-  const candidates = filterOffers({
+  const doctrineClass = classifyFromDoctrine(description);
+  if (doctrineClass.problem_slug) {
+    intake.problem_slug = doctrineClass.problem_slug;
+    intake.need_type = doctrineClass.need_type;
+    intake.problem_type = doctrineClass.problem_type;
+    intake.classifier = doctrineClass.classifier;
+  }
+
+  let candidates = filterOffers({
     needType: intake.need_type,
     problemType: intake.problem_type,
     location: intake.location || input.location,
   });
+  candidates = disambiguateOffers(description, candidates);
+
+  if (intake.problem_slug) {
+    const slugMatches = candidates.filter((o) => o.problemSlug === intake.problem_slug);
+    if (slugMatches.length) {
+      candidates = slugMatches;
+    } else if (candidates.length) {
+      candidates = [];
+    }
+  }
 
   const queryEncoding = intake.emotional_encoding;
   const routing_source = input.routing_source ?? "llm";

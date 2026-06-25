@@ -40,9 +40,10 @@ export function statusWeight(status) {
   return STATUS_RANK[status] ?? 0.7;
 }
 
-export function filterOffers({ needType, problemType, location }) {
+export function filterOffers({ needType, problemType, location, routingEligibleOnly = true }) {
   const loc = (location ?? "").toLowerCase();
   return OFFERS.filter((offer) => {
+    if (routingEligibleOnly && offer.routingEligible === false) return false;
     if (needType && offer.needType !== needType) return false;
     if (problemType && offer.problemType !== problemType) return false;
     if (loc && offer.market?.city) {
