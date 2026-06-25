@@ -4,6 +4,7 @@ import {
   appendSignalLogLines,
   pickUnsyncedSignals,
   patchOpportunityMarkdown,
+  isMatchTierSignal,
 } from "../src/lib/librarian.mjs";
 
 const SAMPLE = `---
@@ -44,6 +45,7 @@ describe("patchOpportunityMarkdown", () => {
         type: "booking",
         confidence: 0.85,
         portable: false,
+        attribution_tier: "match",
         note: "New booking",
         created_at: "2026-06-26T10:00:00.000Z",
       },
@@ -66,13 +68,32 @@ describe("patchOpportunityMarkdown", () => {
         type: "outcome",
         confidence: 0.65,
         portable: true,
-        resolution: { resolved: true },
+        attribution_tier: "match",
+        resolution: { resolved: true, attribution_tier: "match" },
         created_at: "2026-06-26T11:00:00.000Z",
       },
     ];
     const r = patchOpportunityMarkdown(base, signals, []);
     expect(r.markdown).toMatch(/resolution_rate:\s*1/);
     expect(r.markdown).toMatch(/resolution_count:\s*1/);
+  });
+
+  it("ignores capability_proxy signals for economics", () => {
+    const base = SAMPLE.replace("resolution_count: 2", "resolution_count: 0");
+    const signals = [
+      {
+        id: "sig_proxy",
+        type: "outcome",
+        confidence: 0.65,
+        portable: true,
+        attribution_tier: "capability_proxy",
+        resolution: { resolved: true, attribution_tier: "capability_proxy" },
+        created_at: "2026-06-26T11:00:00.000Z",
+      },
+    ];
+    const r = patchOpportunityMarkdown(base, signals, []);
+    expect(r.appended).toBe(0);
+    expect(r.markdown).toMatch(/resolution_count:\s*0/);
   });
 
   it("preserves hash-tags and comments in frontmatter", () => {
@@ -99,6 +120,7 @@ last_validated: 2026-01-01
         type: "booking",
         confidence: 0.8,
         portable: false,
+        attribution_tier: "match",
         note: "Kept tags",
         created_at: "2026-06-26T12:00:00.000Z",
       },
@@ -121,9 +143,27 @@ describe("appendSignalLogLines", () => {
 describe("pickUnsyncedSignals", () => {
   it("filters by id", () => {
     const pending = pickUnsyncedSignals(
-      [{ id: "a" }, { id: "b" }],
+      [{ id: "a", attribution_tier: "match" }, { id: "b", attribution_tier: "match" }],
       ["a"],
     );
     expect(pending.map((s) => s.id)).toEqual(["b"]);
+  });
+
+  it("drops non-match attribution tiers", () => {
+    const pending = pickUnsyncedSignals(
+      [
+        { id: "a", attribution_tier: "match" },
+        { id: "b", attribution_tier: "capability_proxy" },
+      ],
+      [],
+    );
+    expect(pending.map((s) => s.id)).toEqual(["a"]);
+  });
+});
+
+describe("isMatchTierSignal", () => {
+  it("reads tier from resolution json", () => {
+    expect(isMatchTierSignal({ resolution: { attribution_tier: "match" } })).toBe(true);
+    expect(isMatchTierSignal({ resolution: { attribution_tier: "capability_proxy" } })).toBe(false);
   });
 });
