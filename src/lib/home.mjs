@@ -325,8 +325,8 @@ export function homeHtml(offerCount, syncedAt, options = {}) {
           if (m.capabilities_matched && m.capabilities_matched.length) {
             html += '<p class="outcome"><strong>Capabilities:</strong> ' + escapeHtml(m.capabilities_matched.join(", ")) + "</p>";
           }
-          html += '<p class="outcome">Confidence ' + conf + "% · resonance " + escapeHtml(String(m.resonance ?? "—")) + " · trust " + escapeHtml(String(m.trust_score ?? "—")) + "</p>";
-          html += '<div class="confidence" title="confidence_score"><span style="width:' + conf + '%"></span></div>";
+          html += "<p class=\\"outcome\\">Confidence " + conf + "% · resonance " + escapeHtml(String(m.resonance ?? "—")) + " · trust " + escapeHtml(String(m.trust_score ?? "—")) + "</p>";
+          html += "<div class=\\"confidence\\" title=\\"confidence_score\\"><span style=\\"width:" + conf + "%\\"></span></div>";
           html += "</article>";
         }
       } else if (friction) {
