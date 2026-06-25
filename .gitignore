@@ -1,0 +1,14 @@
+node_modules/
+.wrangler/
+dist/
+.DS_Store
+.env
+.env.*
+.librarian-state.json
+# Generated from knowledge — run npm run sync:doctrine
+src/generated/
+data/offers/
+data/opportunities/
+
+# Local doctrine symlink (optional, like DeservedOS)
+knowledge

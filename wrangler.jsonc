@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "deserved",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-06-25",
+  "workers_dev": true,
+  "preview_urls": true,
+  "kv_namespaces": [
+    {
+      "binding": "DESERVED_SIGNALS",
+      "id": "00000000000000000000000000000001",
+      "preview_id": "00000000000000000000000000000001"
+    }
+  ]
+}

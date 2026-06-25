@@ -1,0 +1,23 @@
+{
+  "name": "deserved",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync:doctrine": "node scripts/sync-doctrine.mjs",
+    "predev": "npm run sync:doctrine",
+    "predeploy": "npm run sync:doctrine",
+    "dev": "wrangler dev --port 8787 --ip 127.0.0.1",
+    "open": "open http://127.0.0.1:8787/ui",
+    "deploy": "wrangler deploy",
+    "test": "npm run sync:doctrine && vitest run",
+    "librarian:sync": "node scripts/librarian-sync.mjs",
+    "mcp": "node mcp/server.mjs"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "vitest": "^4.1.4",
+    "wrangler": "^4.90.0",
+    "yaml": "^2.8.0"
+  }
+}
