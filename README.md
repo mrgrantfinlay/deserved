@@ -26,7 +26,7 @@ npm run dev
 npm run open            # http://127.0.0.1:8787/ui
 ```
 
-Use **http** not https locally.
+Use **http** not https locally. Production: `https://deserved.grantwilliamfinlay.workers.dev`
 
 ## Examples
 

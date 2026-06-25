@@ -12,7 +12,9 @@ import { parse as parseYaml } from "yaml";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
-const KNOWLEDGE_ROOT = path.resolve(ROOT, "../knowledge");
+const KNOWLEDGE_ROOT = path.resolve(
+  process.env.KNOWLEDGE_ROOT || path.join(ROOT, "../knowledge"),
+);
 const OPPORTUNITIES_SRC = path.join(KNOWLEDGE_ROOT, "04-Opportunities");
 const OFFERS_SRC = path.join(KNOWLEDGE_ROOT, "offers");
 const OFFERS_DST = path.join(ROOT, "data/offers");

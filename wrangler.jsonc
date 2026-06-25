@@ -3,13 +3,14 @@
   "name": "deserved",
   "main": "src/index.mjs",
   "compatibility_date": "2026-06-25",
+  "account_id": "828d1205c95a96fd9f7a7683b30cb196",
   "workers_dev": true,
   "preview_urls": true,
   "kv_namespaces": [
     {
       "binding": "DESERVED_SIGNALS",
-      "id": "00000000000000000000000000000001",
-      "preview_id": "00000000000000000000000000000001"
+      "id": "6691d5d2802f4a818011bc5ca579563a",
+      "preview_id": "fed04eb696b544899968eecef5daa7b8"
     }
   ]
 }

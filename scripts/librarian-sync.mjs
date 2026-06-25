@@ -17,8 +17,14 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
-const DEFAULT_KNOWLEDGE = path.resolve(ROOT, "../knowledge");
-const DEFAULT_STATE = path.join(ROOT, ".librarian-state.json");
+const DEFAULT_KNOWLEDGE = path.resolve(
+  process.env.KNOWLEDGE_ROOT || path.join(ROOT, "../knowledge"),
+);
+const DEFAULT_STATE =
+  process.env.LIBRARIAN_STATE ||
+  (process.env.KNOWLEDGE_ROOT
+    ? path.join(process.env.KNOWLEDGE_ROOT, ".deserved-librarian-state.json")
+    : path.join(ROOT, ".librarian-state.json"));
 
 function parseArgs(argv) {
   const opts = {
