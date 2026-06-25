@@ -6,7 +6,7 @@ import {
   urgencyMatch,
 } from "./asp.mjs";
 import { classifyIntake } from "./classify.mjs";
-import { classifyFromDoctrine, disambiguateOffers } from "./routing.mjs";
+import { classifyFromDoctrine, disambiguateOffers, buildRoutingFriction, capabilityIdsForProblemSlug, providersForCapabilityIds } from "./routing.mjs";
 import { newId } from "./util.mjs";
 
 function relevanceBoost(description, offer) {
@@ -125,14 +125,26 @@ export function routeQuery(input) {
     })
     .sort((a, b) => b.confidence_score - a.confidence_score);
 
+  const meta = {
+    candidate_count: candidates.length,
+    query_encoding: queryEncoding,
+    classifier: intake.classifier ?? null,
+  };
+
+  if (intake.problem_slug) {
+    meta.capability_ids = capabilityIdsForProblemSlug(intake.problem_slug);
+    meta.providers_with_capability = providersForCapabilityIds(meta.capability_ids);
+  }
+
+  if (matches.length === 0 && intake.problem_slug) {
+    meta.routing_friction = buildRoutingFriction(intake.problem_slug);
+  }
+
   return {
     ok: true,
     intake,
     matches,
-    meta: {
-      candidate_count: candidates.length,
-      query_encoding: queryEncoding,
-    },
+    meta,
   };
 }
 

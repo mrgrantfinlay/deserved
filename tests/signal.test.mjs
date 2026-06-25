@@ -44,6 +44,25 @@ describe("recordSignal", () => {
     expect(list.offers.length).toBeGreaterThanOrEqual(2);
     expect(list.signal_count).toBe(1);
   });
+
+  it("accepts routing_friction portable signal", async () => {
+    const r = await recordSignal({
+      offer_id: "west-dental-emergency-pain-glasgow",
+      type: "routing_friction",
+      portable: true,
+      confidence: 0.7,
+      note: "problem_slug=dental-emergency; reason=no_routing_eligible_offer",
+      resolution: {
+        problem_slug: "dental-emergency",
+        reason: "no_routing_eligible_offer",
+        capability_ids: ["emergency-dental-assessment"],
+        providers_with_capability: ["west-dental"],
+      },
+    });
+    expect(r.ok).toBe(true);
+    expect(r.signal.type).toBe("routing_friction");
+    expect(r.signal.portable).toBe(true);
+  });
 });
 
 describe("aggregateResolutionRate", () => {

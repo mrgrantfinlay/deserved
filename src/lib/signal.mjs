@@ -7,6 +7,7 @@ const SIGNAL_TYPES = new Set([
   "booking",
   "outcome",
   "friction",
+  "routing_friction",
   "pattern_reused",
   "funnel_anomaly",
   "capability_gap",

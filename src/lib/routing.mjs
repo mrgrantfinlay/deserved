@@ -7,15 +7,26 @@ import {
   MARKETS,
   CLASSIFIER,
 } from "../generated/routing-index.mjs";
+import { CAPABILITIES } from "../generated/capabilities.mjs";
+
+function termInText(text, term) {
+  const t = String(term).toLowerCase();
+  if (!t) return false;
+  if (t.length <= 4 || ["pain", "back", "neck", "hip"].includes(t)) {
+    const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`\\b${escaped}\\b`).test(text);
+  }
+  return text.includes(t);
+}
 
 function scorePhrases(text, phrases = [], exclude = []) {
   const lower = String(text).toLowerCase();
   for (const ex of exclude) {
-    if (lower.includes(String(ex).toLowerCase())) return -1;
+    if (termInText(lower, ex)) return -1;
   }
   let score = 0;
   for (const p of phrases) {
-    if (lower.includes(String(p).toLowerCase())) score += 1;
+    if (termInText(lower, p)) score += 1;
   }
   return score;
 }
@@ -97,4 +108,51 @@ export function disambiguateOffers(description, candidates) {
   return candidates;
 }
 
-export { PROBLEMS, NEEDS, MARKETS, CLASSIFIER };
+export function capabilityIdsForProblemSlug(slug) {
+  return PROBLEMS[slug]?.capability_ids ?? [];
+}
+
+export function providersForCapabilityIds(ids = []) {
+  const providers = new Set();
+  for (const id of ids) {
+    for (const provider of CAPABILITIES[id]?.providers ?? []) {
+      providers.add(provider);
+    }
+  }
+  return [...providers];
+}
+
+/**
+ * Build routing_friction meta when problem_slug resolves but RouteQuery returns zero matches.
+ */
+export function buildRoutingFriction(problemSlug) {
+  const problem = PROBLEMS[problemSlug];
+  if (!problem?.default_offer_id) return null;
+
+  const capability_ids = capabilityIdsForProblemSlug(problemSlug);
+  const providers_with_capability = providersForCapabilityIds(capability_ids);
+
+  return {
+    problem_slug: problemSlug,
+    reason: "no_routing_eligible_offer",
+    default_offer_id: problem.default_offer_id,
+    capability_ids,
+    providers_with_capability,
+    portable: true,
+    suggested_signal: {
+      type: "routing_friction",
+      offer_id: problem.default_offer_id,
+      confidence: 0.7,
+      portable: true,
+      note: `problem_slug=${problemSlug}; reason=no_routing_eligible_offer; providers=${providers_with_capability.join(",")}`,
+      resolution: {
+        problem_slug: problemSlug,
+        reason: "no_routing_eligible_offer",
+        capability_ids,
+        providers_with_capability,
+      },
+    },
+  };
+}
+
+export { PROBLEMS, NEEDS, MARKETS, CLASSIFIER, CAPABILITIES };
