@@ -42,11 +42,3 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
-
-      - name: Upload SIGNAL_API_KEY secret
-        if: ${{ secrets.SIGNAL_API_KEY != '' }}
-        run: printf '%s' "$SIGNAL_API_KEY" | npx wrangler secret put SIGNAL_API_KEY
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          SIGNAL_API_KEY: ${{ secrets.SIGNAL_API_KEY }}
