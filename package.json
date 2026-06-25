@@ -12,6 +12,7 @@
     "deploy": "wrangler deploy",
     "test": "npm run sync:doctrine && vitest run",
     "librarian:sync": "node scripts/librarian-sync.mjs",
+    "promote:offers": "node scripts/promote-offers.mjs",
     "mcp": "node mcp/server.mjs"
   },
   "devDependencies": {
