@@ -11,24 +11,14 @@ import { newId } from "./util.mjs";
 
 function relevanceBoost(description, offer) {
   const lower = description.toLowerCase();
-  const offDomain = 0.05;
-  if (/\b(tooth|teeth|dental|dentist|abscess|broken tooth)\b/.test(lower)) {
-    return offer.providerId === "west-dental" ? 2 : offDomain;
-  }
-  if (/\b(medication|prescription|side effect|pills|dosage)\b/.test(lower)) {
-    return offer.id.includes("medication-review") ? 2 : offDomain;
-  }
-  if (/\b(sti|std|sexual health|chlamydia)\b/.test(lower)) {
-    return offer.id.includes("sti-screening") ? 2 : offDomain;
-  }
   if (/\b(burnout|burned out|overwhelmed|stressed)\b/.test(lower)) {
     return offer.id.includes("stress-burnout") ? 2 : 0.6;
   }
   if (/\b(back|neck|spine|lower back)\b/.test(lower)) {
     return offer.id.includes("back-pain") ? 2 : 0.6;
   }
-  if (/\b(smile|self-conscious|cosmetic|whitening)\b/.test(lower)) {
-    return offer.id.includes("smile-confidence") ? 2 : offDomain;
+  if (/\b(pregnancy|pregnant|prenatal|trimester|maternity)\b/.test(lower)) {
+    return offer.id.includes("pregnancy") ? 2 : 0.6;
   }
   return 1;
 }
@@ -72,6 +62,8 @@ export function routeQuery(input) {
     } else if (candidates.length) {
       candidates = [];
     }
+  } else {
+    candidates = [];
   }
 
   const queryEncoding = intake.emotional_encoding;

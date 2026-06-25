@@ -12,7 +12,7 @@ Route real Needs to validated human problem-solvers. Doctrine lives in [`knowled
 | `POST /signal` | **RecordSignal** | Persist runtime Signal + Observation |
 | `GET /signals?offer_id=` | — | List signals (KV-backed in dev/deploy) |
 | `GET /offers` | — | Synced catalog |
-| `GET /ui` | — | Browser demo |
+| `GET /`, `GET /ui` | — | Directory (HTML) |
 
 MCP: [`mcp/server.mjs`](mcp/server.mjs) — `npm run mcp`
 
@@ -23,7 +23,7 @@ cd ~/Documents/GitHub/deserved
 npm install
 npm run sync:doctrine   # 04-Opportunities/*.md + JSON-LD
 npm run dev
-npm run open            # http://127.0.0.1:8787/ui
+npm run open            # http://127.0.0.1:8787/
 ```
 
 Use **http** not https locally. Production: `https://deserved.grantwilliamfinlay.workers.dev`
@@ -48,16 +48,13 @@ curl -s http://127.0.0.1:8787/signal -H 'content-type: application/json' -d '{
 
 ## Corpus (Glasgow)
 
-6 opportunity cells — 3 providers, 5 problem types (Functional, Emotional, Systemic, Identity):
+3 opportunity cells — Deserved Massage only (massage cell #1):
 
 | Offer | Status |
 |-------|--------|
 | deserved-massage-back-pain-glasgow | provisional |
 | deserved-massage-stress-burnout-glasgow | provisional |
-| north-park-pharmacy-sti-screening-glasgow | draft |
-| north-park-pharmacy-medication-review-glasgow | draft |
-| west-dental-emergency-pain-glasgow | draft |
-| west-dental-smile-confidence-glasgow | draft |
+| deserved-massage-pregnancy-glasgow | provisional |
 
 ## Architecture
 

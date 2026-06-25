@@ -6,8 +6,8 @@
  *   POST /signal          RecordSignal → Signal + Observation
  *   GET  /signals         List runtime signals for an offer
  *   GET  /offers          Catalog (debug)
- *   GET  /                HTML demo UI (JSON with ?format=json)
- *   GET  /ui              HTML demo UI (always)
+ *   GET  /                Directory (HTML; ?format=json for API index)
+ *   GET  /ui              Alias for /
  *   GET  /api             JSON API index
  *   GET  /healthz
  */
@@ -43,7 +43,8 @@ const API_INDEX = {
   version: "0.3.0",
   docs: "https://github.com/mrgrantfinlay/deserved",
   endpoints: {
-    "GET /": "This index",
+    "GET /": "Directory (HTML; ?format=json for this index)",
+    "GET /ui": "Alias for /",
     "GET /healthz": "Liveness + catalog sync time",
     "GET /offers": "Synced offer catalog (JSON-LD)",
     "POST /intake": "Classify need_description → Need + Problem types",
@@ -88,7 +89,7 @@ export default {
         if (request.method === "HEAD") {
           return new Response(null, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8", ...CORS } });
         }
-        return new Response(homeHtml(listOffers().length, SYNCED_AT, { host: url.hostname }), {
+        return new Response(homeHtml(), {
           status: 200,
           headers: { "Content-Type": "text/html; charset=utf-8", ...CORS },
         });

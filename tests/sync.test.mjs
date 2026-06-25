@@ -11,7 +11,9 @@ describe("sync-doctrine", () => {
     const src = readFileSync(catalogPath, "utf8");
     expect(src).toContain("deserved-massage-back-pain-glasgow");
     expect(src).toContain("deserved-massage-stress-burnout-glasgow");
-    expect(src).toContain("west-dental-smile-confidence-glasgow");
+    expect(src).toContain("deserved-massage-pregnancy-glasgow");
+    expect(src).not.toContain("west-dental");
+    expect(src).not.toContain("north-park-pharmacy");
     expect(src).toContain("owner_earnings_positive");
     expect(src).toContain("doctrinePath");
   });

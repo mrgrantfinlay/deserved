@@ -42,13 +42,13 @@ T2D is **not** a separate repo — it lives at `DeservedOS/07-scripts/t2d/` (ADR
 
 | Ontology object | Deserved Phase 1 | DeservedOS | T2D |
 |-----------------|------------------|------------|-----|
-| **Signal** | — | `me_events`, quiz leads, funnel anomalies | ME feedback bridge → pain lifecycle |
-| **Resolution** | — | Acuity appointments (Supabase mirror) | — |
+| **Signal** | `POST /signal` (KV) | Acuity webhook → `emitDeservedBookingSignal`, `runtime_signals` | ME feedback bridge |
+| **Resolution** | via `type=outcome` signals | Outcome sweep cron → `emitDeservedOutcomeSignal` | — |
 | **Trust** | Decay function on `deserved:trustScore` at route time | Google reviews, repeat booking reports | — |
 | **Validation** | `POST /validate-offer` → gate report | `check:site-contract`, ME promote rules | Embedded Validation Stack |
 | **Metrics** | — | `report:*` scripts, unit economics | `t2d_phase_runs` |
 
-**Future wire:** DeservedOS `appointments` + satisfaction → `POST /signal` on deserved API → `RecordSignal`.
+**Wire:** DeservedOS `appointments` → Match-tier `RecordSignal` when `book_attribution` / `landing_path` resolves intent (`report:match-attribution`).
 
 ---
 
@@ -58,7 +58,7 @@ T2D is **not** a separate repo — it lives at `DeservedOS/07-scripts/t2d/` (ADR
 |--------|------------------|---------------------|
 | **RouteQuery** | `POST /route` | `treatment-quiz-routing.json` + `quiz_lead.mjs` |
 | **ValidateOffer** | `POST /validate-offer` | Economics reports + ME promotion gates |
-| **RecordSignal** | Not built | Webhooks + `me_scoring_runs` |
+| **RecordSignal** | `POST /signal` | Acuity webhook + outcome sweep (`deserved_signal.mjs`) |
 | **RunExperiment** | Not built | ME challenger cycles |
 | **CompressToDoctrine** | Manual PR to `knowledge/04-Opportunities/` | T2D promote + Librarian workflow |
 | **GraduateProvider** | Not built | Therapist portal / cell economics gates |

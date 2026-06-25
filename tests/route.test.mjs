@@ -15,22 +15,14 @@ describe("routeQuery", () => {
     expect(r.intake.problem_slug).toBe("back-pain");
   });
 
-  it("classifies STI but returns no match until pharmacy cell is routing-eligible", () => {
-    const r = routeQuery({
-      need_description: "Need STI screening confidentially in Glasgow",
-      location: "Glasgow",
-    });
-    expect(r.intake.problem_slug).toBe("sti-screening");
-    expect(r.matches.length).toBe(0);
-  });
-
-  it("classifies dental emergency but returns no match until west-dental is routing-eligible", () => {
+  it("returns no match for out-of-scope dental intake", () => {
     const r = routeQuery({
       need_description: "Broken tooth, severe dental pain Glasgow emergency",
       location: "Glasgow",
     });
-    expect(r.intake.problem_slug).toBe("dental-emergency");
+    expect(r.intake.problem_slug).toBeFalsy();
     expect(r.matches.length).toBe(0);
+    expect(r.meta.routing_friction).toBeUndefined();
   });
 
   it("routes burnout to deserved massage emotional offer", () => {
@@ -41,12 +33,12 @@ describe("routeQuery", () => {
     expect(r.matches[0].offer_id).toBe("deserved-massage-stress-burnout-glasgow");
   });
 
-  it("classifies smile confidence but returns no match until west-dental is routing-eligible", () => {
+  it("routes pregnancy comfort to massage offer", () => {
     const r = routeQuery({
-      need_description: "Self-conscious about my smile in meetings, Glasgow",
+      need_description: "Pregnant, second trimester, need gentle massage Glasgow",
       location: "Glasgow",
     });
-    expect(r.intake.problem_slug).toBe("smile-confidence");
-    expect(r.matches.length).toBe(0);
+    expect(r.intake.problem_slug).toBe("pregnancy-comfort");
+    expect(r.matches[0].offer_id).toBe("deserved-massage-pregnancy-glasgow");
   });
 });

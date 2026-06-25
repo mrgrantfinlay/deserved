@@ -8,7 +8,7 @@
     "predev": "npm run sync:doctrine",
     "predeploy": "npm run sync:doctrine",
     "dev": "wrangler dev --port 8787 --ip 127.0.0.1",
-    "open": "open http://127.0.0.1:8787/ui",
+    "open": "open http://127.0.0.1:8787/",
     "deploy": "wrangler deploy",
     "test": "npm run sync:doctrine && vitest run",
     "librarian:sync": "node scripts/librarian-sync.mjs",

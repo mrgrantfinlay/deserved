@@ -47,16 +47,16 @@ describe("recordSignal", () => {
 
   it("accepts routing_friction portable signal", async () => {
     const r = await recordSignal({
-      offer_id: "west-dental-emergency-pain-glasgow",
+      offer_id: "deserved-massage-back-pain-glasgow",
       type: "routing_friction",
       portable: true,
       confidence: 0.7,
-      note: "problem_slug=dental-emergency; reason=no_routing_eligible_offer",
+      note: "problem_slug=back-pain; reason=no_routing_eligible_offer",
       resolution: {
-        problem_slug: "dental-emergency",
+        problem_slug: "back-pain",
         reason: "no_routing_eligible_offer",
-        capability_ids: ["emergency-dental-assessment"],
-        providers_with_capability: ["west-dental"],
+        capability_ids: ["deep-tissue-massage"],
+        providers_with_capability: ["deserved-massage"],
       },
     });
     expect(r.ok).toBe(true);
