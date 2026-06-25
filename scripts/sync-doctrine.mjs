@@ -109,6 +109,7 @@ function mergeOffer(doctrine, raw, jsonRelPath, opportunityFile) {
       cfa_status: Boolean(doctrine.economics?.cfa_status),
       resolution_rate: doctrine.economics?.resolution_rate ?? 0,
       resolution_count: doctrine.economics?.resolution_count ?? 0,
+      attribution_tier: doctrine.economics?.attribution_tier ?? null,
     },
     signalLog: [],
   };

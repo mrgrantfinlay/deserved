@@ -14,12 +14,17 @@ const GATES = {
   resolution_rate: {
     label: "resolution_rate ≥ 0.70",
     source: "DESERVED-ONTOLOGY.md ValidateOffer",
-    check: (_, o) => (o?.resolutionRate ?? 0) >= 0.7,
+    check: (e) => (e?.resolution_rate ?? 0) >= 0.7,
   },
   resolution_count_validated: {
     label: "resolution_count ≥ 5",
     source: "04-Opportunities/README.md",
     check: (e) => (e?.resolution_count ?? 0) >= 5,
+  },
+  attribution_tier_match: {
+    label: "attribution_tier = match",
+    source: "DESERVED-ONTOLOGY.md § Cell adapter",
+    check: (e) => e?.attribution_tier === "match",
   },
   trust_score_certified: {
     label: "trust_score ≥ 0.80 (certified)",
@@ -52,6 +57,8 @@ export function validateOffer(input) {
       input.economics?.resolution_count ?? offer.economics?.resolution_count ?? 0,
     resolution_rate:
       input.economics?.resolution_rate ?? offer.economics?.resolution_rate ?? offer.resolutionRate ?? 0,
+    attribution_tier:
+      input.economics?.attribution_tier ?? offer.economics?.attribution_tier ?? null,
   };
 
   const targetStatus = input.target_status ?? "validated";

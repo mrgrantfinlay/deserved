@@ -20,6 +20,20 @@ describe("supabaseRowToSignal", () => {
       note: "Acuity booking: Swedish",
       created_at: "2026-06-25T12:00:00.000Z",
       resolution: null,
+      attribution_tier: null,
     });
+  });
+
+  it("extracts attribution_tier from resolution", () => {
+    const signal = supabaseRowToSignal({
+      id: "x",
+      signal_type: "outcome",
+      confidence: 0.7,
+      portable: true,
+      note: "Match outcome",
+      created_at: "2026-06-25T12:00:00.000Z",
+      resolution: { attribution_tier: "match", resolved: true },
+    });
+    expect(signal.attribution_tier).toBe("match");
   });
 });

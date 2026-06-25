@@ -20,10 +20,22 @@ economics:
 `;
 
 describe("evaluateOfferPromotion", () => {
-  it("passes massage stress offer with strong economics", () => {
-    const r = evaluateOfferPromotion("deserved-massage-stress-burnout-glasgow");
+  it("passes massage stress offer when Match-tier economics override passes gates", () => {
+    const r = evaluateOfferPromotion("deserved-massage-stress-burnout-glasgow", {
+      owner_earnings_positive: true,
+      cfa_status: true,
+      resolution_count: 10,
+      resolution_rate: 0.85,
+      attribution_tier: "match",
+    });
     expect(r.ok).toBe(true);
     expect(r.canPromote).toBe(true);
+  });
+
+  it("does not promote from doctrine alone when attribution is unmatched", () => {
+    const r = evaluateOfferPromotion("deserved-massage-stress-burnout-glasgow");
+    expect(r.ok).toBe(true);
+    expect(r.canPromote).toBe(false);
   });
 });
 

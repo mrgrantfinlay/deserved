@@ -34,9 +34,22 @@ export function formatSignalLine(signal) {
   return `${date} | ${signal.type} | ${confidence} | ${portable} | ${note}`;
 }
 
+export function signalAttributionTier(signal) {
+  return (
+    signal?.attribution_tier ??
+    signal?.resolution?.attribution_tier ??
+    null
+  );
+}
+
+/** Tier C economics — only Match-tier signals patch resolution_* on problem Offers. */
+export function isMatchTierSignal(signal) {
+  return signalAttributionTier(signal) === "match";
+}
+
 export function pickUnsyncedSignals(signals, syncedIds = []) {
   const seen = new Set(syncedIds);
-  return (signals || []).filter((s) => s.id && !seen.has(s.id));
+  return (signals || []).filter((s) => s.id && !seen.has(s.id) && isMatchTierSignal(s));
 }
 
 export function appendSignalLogLines(body, newLines) {
@@ -101,14 +114,15 @@ export function patchOpportunityMarkdown(text, signals, syncedIds = []) {
   const { body, appended, error } = appendSignalLogLines(parts.body, lines);
   if (error) return { ok: false, error };
 
+  const matchSignals = (signals || []).filter(isMatchTierSignal);
   const runtimeRate =
-    signals.length && signals.some((s) => s.type === "outcome")
-      ? aggregateResolutionRateFromSignals(signals)
+    matchSignals.length && matchSignals.some((s) => s.type === "outcome")
+      ? aggregateResolutionRateFromSignals(matchSignals)
       : null;
 
   const rawFm = patchEconomicsInRawFrontmatter(parts.rawFm, {
     runtimeRate,
-    outcomeCount: countOutcomeSignals(signals),
+    outcomeCount: countOutcomeSignals(matchSignals),
   });
 
   return {

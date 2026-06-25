@@ -14,6 +14,9 @@ function restBase(url) {
 }
 
 export function supabaseRowToSignal(row) {
+  const resolution = row.resolution ?? null;
+  const attribution_tier =
+    resolution && typeof resolution === "object" ? resolution.attribution_tier ?? null : null;
   return {
     id: row.id,
     type: row.signal_type,
@@ -21,7 +24,8 @@ export function supabaseRowToSignal(row) {
     portable: Boolean(row.portable),
     note: row.note ?? "",
     created_at: row.created_at ?? new Date().toISOString(),
-    resolution: row.resolution ?? null,
+    resolution,
+    attribution_tier,
   };
 }
 
@@ -35,7 +39,8 @@ export async function fetchUnsyncedSignalsFromSupabase(env, offerId) {
     `offer_id=eq.${encodeURIComponent(offerId)}` +
     `&doctrine_synced_at=is.null` +
     `&order=created_at.asc` +
-    `&select=id,offer_id,signal_type,confidence,portable,note,created_at,resolution`;
+    `&select=id,offer_id,signal_type,confidence,portable,note,created_at,resolution` +
+    `&resolution->>attribution_tier=eq.match`;
 
   const response = await fetch(`${restBase(baseUrl)}/runtime_signals?${query}`, {
     headers: {
