@@ -101,5 +101,7 @@ Acuity bookings → `booking` signals; hourly cron → `outcome` signals. See De
 
 | Repo | Role |
 |------|------|
-| [knowledge](https://github.com/mrgrantfinlay/knowledge) | Doctrine |
+| [knowledge](https://github.com/mrgrantfinlay/knowledge) | Doctrine — [`DESERVED-CLICKUP.md`](../knowledge/DESERVED-CLICKUP.md) |
 | [DeservedOS](https://github.com/mrgrantfinlay/DeservedOS) | T3 cell — Acuity → `POST /signal` (see bridge doc) |
+
+ClickUp epic: https://app.clickup.com/t/869dvvddj (list `901218284108`)
