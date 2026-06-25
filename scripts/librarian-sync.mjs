@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * Librarian sync — fetch runtime signals from deserved API → append knowledge signal logs.
+ * Librarian sync — fetch runtime signals → append knowledge signal logs.
  *
  *   DESERVED_API_URL=http://127.0.0.1:8787 npm run librarian:sync
+ *   LIBRARIAN_SOURCE=supabase npm run librarian:sync -- --source supabase
  *   npm run librarian:sync -- --dry-run
  */
 import { readFile, writeFile, mkdir } from "node:fs/promises";
@@ -14,6 +15,10 @@ import {
   patchOpportunityMarkdown,
   saveLibrarianState,
 } from "../src/lib/librarian.mjs";
+import {
+  fetchUnsyncedSignalsFromSupabase,
+  markSignalsSyncedInSupabase,
+} from "../src/lib/supabase-signals.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -29,13 +34,18 @@ const DEFAULT_STATE =
 function parseArgs(argv) {
   const opts = {
     dryRun: false,
+    source: process.env.LIBRARIAN_SOURCE || "api",
     knowledgeRoot: process.env.KNOWLEDGE_ROOT || DEFAULT_KNOWLEDGE,
     apiUrl: (process.env.DESERVED_API_URL || "http://127.0.0.1:8787").replace(/\/+$/, ""),
     apiKey: process.env.DESERVED_API_KEY || process.env.SIGNAL_API_KEY || "",
     statePath: process.env.LIBRARIAN_STATE || DEFAULT_STATE,
+    supabaseUrl: process.env.SUPABASE_URL || "",
+    supabaseKey:
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || "",
   };
   for (let i = 2; i < argv.length; i += 1) {
     if (argv[i] === "--dry-run") opts.dryRun = true;
+    else if (argv[i] === "--source" && argv[i + 1]) opts.source = argv[++i];
     else if (argv[i] === "--knowledge-root" && argv[i + 1]) opts.knowledgeRoot = argv[++i];
     else if (argv[i] === "--api-url" && argv[i + 1]) opts.apiUrl = argv[++i].replace(/\/+$/, "");
     else if (argv[i] === "--state" && argv[i + 1]) opts.statePath = argv[++i];
@@ -43,12 +53,23 @@ function parseArgs(argv) {
   return opts;
 }
 
-async function fetchSignals(apiUrl, apiKey, offerId) {
+function supabaseEnv(opts) {
+  return {
+    SUPABASE_URL: opts.supabaseUrl,
+    SUPABASE_SERVICE_ROLE_KEY: opts.supabaseKey,
+  };
+}
+
+async function fetchSignals(opts, offerId) {
+  if (opts.source === "supabase") {
+    return fetchUnsyncedSignalsFromSupabase(supabaseEnv(opts), offerId);
+  }
+
   const headers = { Accept: "application/json" };
-  if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+  if (opts.apiKey) headers.Authorization = `Bearer ${opts.apiKey}`;
 
   const response = await fetch(
-    `${apiUrl}/signals?offer_id=${encodeURIComponent(offerId)}`,
+    `${opts.apiUrl}/signals?offer_id=${encodeURIComponent(offerId)}`,
     { headers },
   );
   let data = null;
@@ -70,26 +91,31 @@ export async function runLibrarianSync(rawOpts = {}) {
   if (!opts.knowledgeRoot) opts.knowledgeRoot = defaults.knowledgeRoot;
   if (!opts.apiUrl) opts.apiUrl = defaults.apiUrl;
   if (!opts.statePath) opts.statePath = defaults.statePath;
+
+  const useSupabase = opts.source === "supabase";
   let stateRaw = null;
-  try {
-    stateRaw = await readFile(opts.statePath, "utf8");
-  } catch {
-    stateRaw = null;
+  let state = { synced: {} };
+  if (!useSupabase) {
+    try {
+      stateRaw = await readFile(opts.statePath, "utf8");
+    } catch {
+      stateRaw = null;
+    }
+    state = loadLibrarianState(stateRaw);
   }
-  const state = loadLibrarianState(stateRaw);
 
   const results = [];
   let totalAppended = 0;
 
   for (const offer of OFFERS) {
     const doctrineFile = path.join(opts.knowledgeRoot, offer.doctrinePath);
-    const fetched = await fetchSignals(opts.apiUrl, opts.apiKey, offer.id);
+    const fetched = await fetchSignals(opts, offer.id);
     if (!fetched.ok) {
       results.push({ offer_id: offer.id, ok: false, error: fetched.error });
       continue;
     }
 
-    const syncedIds = state.synced[offer.id] ?? [];
+    const syncedIds = useSupabase ? [] : (state.synced[offer.id] ?? []);
     let text;
     try {
       text = await readFile(doctrineFile, "utf8");
@@ -106,7 +132,19 @@ export async function runLibrarianSync(rawOpts = {}) {
 
     if (patch.appended > 0 && !opts.dryRun) {
       await writeFile(doctrineFile, patch.markdown, "utf8");
-      state.synced[offer.id] = [...syncedIds, ...patch.newSyncedIds];
+      if (useSupabase) {
+        const mark = await markSignalsSyncedInSupabase(supabaseEnv(opts), patch.newSyncedIds);
+        if (!mark.ok) {
+          results.push({
+            offer_id: offer.id,
+            ok: false,
+            error: `doctrine patched but supabase mark failed: ${mark.error}`,
+          });
+          continue;
+        }
+      } else {
+        state.synced[offer.id] = [...syncedIds, ...patch.newSyncedIds];
+      }
     }
 
     totalAppended += patch.appended;
@@ -115,11 +153,12 @@ export async function runLibrarianSync(rawOpts = {}) {
       ok: true,
       appended: patch.appended,
       signal_count: fetched.signals.length,
+      source: opts.source,
       dry_run: opts.dryRun,
     });
   }
 
-  if (!opts.dryRun) {
+  if (!opts.dryRun && !useSupabase) {
     await mkdir(path.dirname(opts.statePath), { recursive: true });
     await writeFile(opts.statePath, saveLibrarianState(state), "utf8");
   }
@@ -127,10 +166,11 @@ export async function runLibrarianSync(rawOpts = {}) {
   return {
     ok: true,
     dry_run: opts.dryRun,
+    source: opts.source,
     offers_scanned: OFFERS.length,
     lines_appended: totalAppended,
     results,
-    state_path: opts.statePath,
+    state_path: useSupabase ? null : opts.statePath,
   };
 }
 
