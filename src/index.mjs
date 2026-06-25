@@ -40,7 +40,7 @@ const CORS = {
 const API_INDEX = {
   ok: true,
   service: "deserved",
-  version: "0.2.0",
+  version: "0.3.0",
   docs: "https://github.com/mrgrantfinlay/deserved",
   endpoints: {
     "GET /": "This index",
@@ -88,7 +88,7 @@ export default {
         if (request.method === "HEAD") {
           return new Response(null, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8", ...CORS } });
         }
-        return new Response(homeHtml(listOffers().length, SYNCED_AT), {
+        return new Response(homeHtml(listOffers().length, SYNCED_AT, { host: url.hostname }), {
           status: 200,
           headers: { "Content-Type": "text/html; charset=utf-8", ...CORS },
         });
